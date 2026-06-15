@@ -369,12 +369,24 @@ export default function ProductosPage() {
                   <h3 className="text-emerald-400 text-sm font-semibold uppercase tracking-wider mb-2">Información Principal</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-1">Código de Barras / SKU</label>
-                      <input 
-                        required type="text" value={formData.codigo}
-                        onChange={e => setFormData({...formData, codigo: e.target.value})}
-                        className="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
-                      />
+                      <label className="block text-sm font-medium text-gray-400 mb-1">
+                        Código de Barras / SKU <span className="text-xs text-gray-500 font-normal">(Opcional)</span>
+                      </label>
+                      <div className="flex gap-2">
+                        <input 
+                          type="text" value={formData.codigo}
+                          onChange={e => setFormData({...formData, codigo: e.target.value})}
+                          placeholder="Ej: 7501234567890"
+                          className="flex-1 bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setFormData({...formData, codigo: `SKU-${Date.now().toString().slice(-6)}`})}
+                          className="px-3 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg text-xs text-emerald-400 font-medium transition-colors whitespace-nowrap"
+                        >
+                          Auto
+                        </button>
+                      </div>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-400 mb-1">Nombre Comercial</label>
