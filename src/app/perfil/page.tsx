@@ -6,7 +6,7 @@ import { Settings, Save, Lock, Mail, User, ShieldCheck, Loader2 } from 'lucide-r
 
 export default function PerfilPage() {
   const { usuario, logout } = useGlobal();
-  const [email, setEmail] = useState(usuario?.email || '');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
