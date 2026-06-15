@@ -30,7 +30,7 @@ graph TD
 
     %% Frontera del Backend (Next.js API Routes)
     subgraph Backend [Next.js API Routes]
-        API[/api/sheets]
+        API["/api/sheets"]
         Auth[Google Auth Client]
         API -->|Firma peticiones| Auth
     end
