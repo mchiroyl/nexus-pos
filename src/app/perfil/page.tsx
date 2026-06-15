@@ -96,7 +96,7 @@ export default function PerfilPage() {
               <h2 className="text-2xl font-bold text-white leading-tight">@{usuario.username}</h2>
               <div className="flex items-center gap-2 text-emerald-400 mt-1">
                 <ShieldCheck size={16} />
-                <span className="text-sm font-medium capitalize">{usuario.rol}</span>
+                <span className="text-sm font-medium capitalize">{usuario.rol_nombre}</span>
               </div>
             </div>
           </div>

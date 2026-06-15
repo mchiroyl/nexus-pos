@@ -182,7 +182,7 @@ export default function Topbar() {
             </div>
             <div className="hidden md:block text-left">
               <p className="text-sm font-medium text-white leading-tight">{usuario.username}</p>
-              <p className="text-xs text-gray-500 capitalize">{usuario.rol}</p>
+              <p className="text-xs text-gray-500 capitalize">{usuario.rol_nombre}</p>
             </div>
           </button>
 
@@ -190,7 +190,7 @@ export default function Topbar() {
             <div className="absolute right-0 mt-2 w-56 bg-gray-900 border border-gray-800 rounded-xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
               <div className="p-4 border-b border-gray-800 md:hidden">
                 <p className="text-sm font-medium text-white">{usuario.username}</p>
-                <p className="text-xs text-gray-500 capitalize">{usuario.rol}</p>
+                <p className="text-xs text-gray-500 capitalize">{usuario.rol_nombre}</p>
               </div>
               
               <div className="p-2">
