@@ -18,6 +18,7 @@ export interface UsuarioSesion {
   rol_id: string;
   rol_nombre: string;
   permisos: string[];
+  email?: string;
 }
 
 export interface Turno {
