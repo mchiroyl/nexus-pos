@@ -25,7 +25,7 @@ interface CartItem extends Producto {
 }
 
 export default function ComprasPage() {
-  const { empresa } = useGlobal();
+  const { empresa, usuario } = useGlobal();
   const [productos, setProductos] = useState<Producto[]>([]);
   const [proveedores, setProveedores] = useState<Proveedor[]>([]);
   const [loading, setLoading] = useState(true);
