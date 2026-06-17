@@ -36,6 +36,7 @@ export default function ComprasPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedProveedor, setSelectedProveedor] = useState('');
   const [successMsg, setSuccessMsg] = useState(false);
+  const [mobileTab, setMobileTab] = useState<'productos' | 'detalle'>('productos');
 
   useEffect(() => {
     fetchData();
@@ -188,156 +189,188 @@ export default function ComprasPage() {
 
   return (
     <div className="h-screen print:h-auto w-full relative">
-      {/* Vista de Pantalla (Se oculta al imprimir) */}
-      <main className="print:hidden flex flex-col lg:flex-row h-screen bg-gray-950 animate-in fade-in duration-500">
-      
-      {/* Panel Izquierdo: Catálogo de Productos */}
-      <div className="flex-1 flex flex-col p-4 md:p-6 overflow-hidden">
-        <div className="flex items-center gap-3 mb-6">
-          <ShoppingCart className="text-blue-400" size={28} />
-          <h1 className="text-2xl font-bold text-white">Ingresar Compra</h1>
-        </div>
+      {/* Vista de Pantalla */}
+      <main className="print:hidden flex flex-col h-screen bg-gray-950 animate-in fade-in duration-500">
 
-        {/* Buscador */}
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-3 text-gray-500" size={20} />
-          <input 
-            type="text" 
-            placeholder="Buscar producto por código o nombre..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-gray-900 border border-gray-800 rounded-xl py-3 pl-10 pr-4 text-white focus:outline-none focus:border-blue-500 transition-colors"
-          />
-        </div>
-
-        {/* Lista de Productos */}
-        <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-          <div className="flex flex-col gap-3">
-            {filteredProducts.map(prod => (
-              <div 
-                key={prod.id} 
-                onClick={() => addToCart(prod)}
-                className="bg-gray-900 border border-gray-800 hover:border-blue-500/50 rounded-xl p-3 cursor-pointer transition-all hover:bg-gray-800 flex items-center justify-between group"
-              >
-                <div className="flex items-center gap-4">
-                  {prod.imagen_url ? (
-                    <img src={prod.imagen_url} alt={prod.nombre} className="w-14 h-14 object-cover rounded-lg bg-gray-950 border border-gray-800" />
-                  ) : (
-                    <div className="w-14 h-14 rounded-lg bg-gray-950 border border-gray-800 flex items-center justify-center text-gray-600">
-                      <Package size={24} />
-                    </div>
-                  )}
-                  <div>
-                    <h3 className="text-white font-medium text-base mb-1">{prod.nombre}</h3>
-                    <p className="text-gray-500 text-xs font-mono">{prod.codigo}</p>
-                  </div>
-                </div>
-                
-                <div className="text-right">
-                  <div className="text-blue-400 font-bold text-lg">{empresa.moneda}{parseFloat(prod.precio_compra || '0').toFixed(2)}</div>
-                  <div className="text-xs px-2 py-1 bg-gray-950 rounded-lg text-gray-400 mt-1 inline-block border border-gray-800">
-                    Stock: {prod.stock}
-                  </div>
-                </div>
-              </div>
-            ))}
-            {filteredProducts.length === 0 && (
-              <div className="col-span-full text-center py-10 text-gray-500">
-                No se encontraron productos.
-              </div>
+        {/* TAB BAR: Solo visible en móvil */}
+        <div className="flex lg:hidden border-b border-gray-800 bg-gray-900 shrink-0">
+          <button
+            onClick={() => setMobileTab('productos')}
+            className={`flex-1 py-3 text-sm font-semibold flex items-center justify-center gap-2 transition-colors ${
+              mobileTab === 'productos' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-500'
+            }`}
+          >
+            <Package size={16} /> Productos
+          </button>
+          <button
+            onClick={() => setMobileTab('detalle')}
+            className={`flex-1 py-3 text-sm font-semibold flex items-center justify-center gap-2 transition-colors relative ${
+              mobileTab === 'detalle' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-500'
+            }`}
+          >
+            <ShoppingCart size={16} />
+            Detalle
+            {cart.length > 0 && (
+              <span className="absolute top-2 right-[calc(50%-28px)] bg-blue-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                {cart.length}
+              </span>
             )}
-          </div>
-        </div>
-      </div>
-
-      {/* Panel Derecho: Ticket de Ingreso */}
-      <div className="w-full lg:w-[400px] bg-gray-900 border-l border-gray-800 flex flex-col h-full shadow-2xl z-10">
-        
-        {/* Header Compra */}
-        <div className="p-5 border-b border-gray-800 bg-gray-900/50">
-          <h2 className="text-lg font-bold text-white mb-3">Detalle de Ingreso</h2>
-          <div className="relative">
-            <User className="absolute left-3 top-2.5 text-gray-500" size={16} />
-            <select 
-              value={selectedProveedor}
-              onChange={(e) => setSelectedProveedor(e.target.value)}
-              className="w-full bg-gray-950 border border-gray-800 rounded-lg py-2 pl-9 pr-4 text-sm text-white focus:outline-none focus:border-blue-500 appearance-none"
-            >
-              <option value="">Seleccione Proveedor...</option>
-              {proveedores.map(p => (
-                <option key={p.id} value={p.id}>{p.razon_social}</option>
-              ))}
-            </select>
-          </div>
+          </button>
         </div>
 
-        {/* Lista de Items */}
-        <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
-          {cart.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-gray-500 opacity-50">
-              <ShoppingCart size={48} className="mb-4" />
-              <p>Ningún producto seleccionado</p>
+        {/* CONTENIDO */}
+        <div className="flex flex-1 overflow-hidden">
+
+          {/* Panel Izquierdo: Catálogo de Productos */}
+          <div className={`flex-1 flex flex-col p-4 md:p-6 overflow-hidden ${
+            mobileTab === 'productos' ? 'flex' : 'hidden'
+          } lg:flex`}>
+            <div className="flex items-center gap-3 mb-4">
+              <ShoppingCart className="text-blue-400" size={24} />
+              <h1 className="text-xl font-bold text-white">Ingresar Compra</h1>
             </div>
-          ) : (
-            <div className="space-y-2">
-              {cart.map(item => (
-                <div key={item.id} className="bg-gray-950 p-3 rounded-xl border border-gray-800 flex flex-col gap-2">
-                  <div className="flex justify-between items-start">
-                    <span className="text-white font-medium text-sm leading-tight pr-4">{item.nombre}</span>
-                    <button onClick={() => removeFromCart(item.id)} className="text-gray-500 hover:text-red-400">
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                  <div className="flex justify-between items-center mt-1">
-                    <span className="text-blue-400 font-bold text-sm">{empresa.moneda}{item.precio_compra}</span>
-                    
-                    <div className="flex items-center gap-3 bg-gray-900 rounded-lg p-1 border border-gray-800">
-                      <button onClick={() => updateQuantity(item.id, -1)} className="p-1 text-gray-400 hover:text-white bg-gray-800 rounded-md">
-                        <Minus size={14} />
-                      </button>
-                      <span className="text-white text-sm font-medium w-4 text-center">{item.cantidad}</span>
-                      <button onClick={() => updateQuantity(item.id, 1)} className="p-1 text-gray-400 hover:text-white bg-gray-800 rounded-md">
-                        <Plus size={14} />
-                      </button>
+
+            {/* Buscador */}
+            <div className="relative mb-4">
+              <Search className="absolute left-3 top-3 text-gray-500" size={20} />
+              <input 
+                type="text" 
+                placeholder="Buscar producto por código o nombre..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-gray-900 border border-gray-800 rounded-xl py-3 pl-10 pr-4 text-white focus:outline-none focus:border-blue-500 transition-colors"
+              />
+            </div>
+
+            {/* Lista de Productos */}
+            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+              <div className="flex flex-col gap-3">
+                {filteredProducts.map(prod => (
+                  <div 
+                    key={prod.id} 
+                    onClick={() => { addToCart(prod); setMobileTab('detalle'); }}
+                    className="bg-gray-900 border border-gray-800 hover:border-blue-500/50 rounded-xl p-3 cursor-pointer transition-all hover:bg-gray-800 flex items-center justify-between group"
+                  >
+                    <div className="flex items-center gap-3">
+                      {prod.imagen_url ? (
+                        <img src={prod.imagen_url} alt={prod.nombre} className="w-12 h-12 object-cover rounded-lg bg-gray-950 border border-gray-800" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-lg bg-gray-950 border border-gray-800 flex items-center justify-center text-gray-600">
+                          <Package size={20} />
+                        </div>
+                      )}
+                      <div>
+                        <h3 className="text-white font-medium text-sm mb-0.5">{prod.nombre}</h3>
+                        <p className="text-gray-500 text-xs font-mono">{prod.codigo}</p>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <div className="text-blue-400 font-bold">{empresa.moneda}{parseFloat(prod.precio_compra || '0').toFixed(2)}</div>
+                      <div className="text-xs px-2 py-0.5 bg-gray-950 rounded-lg text-gray-400 mt-1 inline-block border border-gray-800">
+                        Stock: {prod.stock}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+                {filteredProducts.length === 0 && (
+                  <div className="col-span-full text-center py-10 text-gray-500">
+                    No se encontraron productos.
+                  </div>
+                )}
+              </div>
             </div>
-          )}
-        </div>
-
-        {/* Resumen y Guardar */}
-        <div className="p-5 border-t border-gray-800 bg-gray-900">
-          <div className="flex justify-between text-white font-bold text-2xl mb-6">
-            <span>Costo Total</span>
-            <span className="text-blue-400">{empresa.moneda}{total.toFixed(2)}</span>
           </div>
 
-          {successMsg ? (
-            <div className="w-full bg-blue-500/20 text-blue-400 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 border border-blue-500/30">
-              <CheckCircle2 size={24} /> ¡Ingreso Exitoso!
+          {/* Panel Derecho: Detalle de Ingreso */}
+          <div className={`w-full lg:w-[400px] bg-gray-900 border-l border-gray-800 flex flex-col shadow-2xl z-10 ${
+            mobileTab === 'detalle' ? 'flex' : 'hidden'
+          } lg:flex`}>
+            
+            {/* Header */}
+            <div className="p-4 border-b border-gray-800 bg-gray-900/50">
+              <h2 className="text-base font-bold text-white mb-3">Detalle de Ingreso</h2>
+              <div className="relative">
+                <User className="absolute left-3 top-2.5 text-gray-500" size={16} />
+                <select 
+                  value={selectedProveedor}
+                  onChange={(e) => setSelectedProveedor(e.target.value)}
+                  className="w-full bg-gray-950 border border-gray-800 rounded-lg py-2 pl-9 pr-4 text-sm text-white focus:outline-none focus:border-blue-500 appearance-none"
+                >
+                  <option value="">Seleccione Proveedor...</option>
+                  {proveedores.map(p => (
+                    <option key={p.id} value={p.id}>{p.razon_social}</option>
+                  ))}
+                </select>
+              </div>
             </div>
-          ) : (
-            <div className="flex gap-3">
-              <button 
-                onClick={() => processPurchase(false)}
-                disabled={cart.length === 0 || processing || !selectedProveedor}
-                className="flex-1 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-white py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2"
-              >
-                {processing ? <Loader2 className="animate-spin" size={20} /> : 'Registrar'}
-              </button>
-              <button 
-                onClick={() => processPurchase(true)}
-                disabled={cart.length === 0 || processing || !selectedProveedor}
-                className="flex-[2] bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:bg-gray-800 text-white py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2"
-              >
-                {processing ? <Loader2 className="animate-spin" size={20} /> : 'Registrar e Imprimir'}
-              </button>
+
+            {/* Lista de Items */}
+            <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
+              {cart.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-gray-500 opacity-50">
+                  <ShoppingCart size={48} className="mb-4" />
+                  <p>Ningún producto seleccionado</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {cart.map(item => (
+                    <div key={item.id} className="bg-gray-950 p-3 rounded-xl border border-gray-800 flex flex-col gap-2">
+                      <div className="flex justify-between items-start">
+                        <span className="text-white font-medium text-sm leading-tight pr-4">{item.nombre}</span>
+                        <button onClick={() => removeFromCart(item.id)} className="text-gray-500 hover:text-red-400">
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                      <div className="flex justify-between items-center mt-1">
+                        <span className="text-blue-400 font-bold text-sm">{empresa.moneda}{item.precio_compra}</span>
+                        <div className="flex items-center gap-3 bg-gray-900 rounded-lg p-1 border border-gray-800">
+                          <button onClick={() => updateQuantity(item.id, -1)} className="p-1 text-gray-400 hover:text-white bg-gray-800 rounded-md">
+                            <Minus size={14} />
+                          </button>
+                          <span className="text-white text-sm font-medium w-4 text-center">{item.cantidad}</span>
+                          <button onClick={() => updateQuantity(item.id, 1)} className="p-1 text-gray-400 hover:text-white bg-gray-800 rounded-md">
+                            <Plus size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
+
+            {/* Resumen y Guardar */}
+            <div className="p-4 border-t border-gray-800 bg-gray-900">
+              <div className="flex justify-between text-white font-bold text-xl mb-4">
+                <span>Costo Total</span>
+                <span className="text-blue-400">{empresa.moneda}{total.toFixed(2)}</span>
+              </div>
+
+              {successMsg ? (
+                <div className="w-full bg-blue-500/20 text-blue-400 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 border border-blue-500/30">
+                  <CheckCircle2 size={24} /> ¡Ingreso Exitoso!
+                </div>
+              ) : (
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => processPurchase(false)}
+                    disabled={cart.length === 0 || processing || !selectedProveedor}
+                    className="flex-1 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-white py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2"
+                  >
+                    {processing ? <Loader2 className="animate-spin" size={20} /> : 'Registrar'}
+                  </button>
+                  <button 
+                    onClick={() => processPurchase(true)}
+                    disabled={cart.length === 0 || processing || !selectedProveedor}
+                    className="flex-[2] bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:bg-gray-800 text-white py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2"
+                  >
+                    {processing ? <Loader2 className="animate-spin" size={20} /> : 'Registrar e Imprimir'}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
       </main>
 
       {/* Ticket para Imprimir (Oculto en pantalla, visible solo al imprimir) */}
