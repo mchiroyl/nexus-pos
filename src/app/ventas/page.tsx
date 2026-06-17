@@ -39,6 +39,7 @@ export default function VentasPage() {
   const [clientSearchTerm, setClientSearchTerm] = useState('');
   const [isClientDropdownOpen, setIsClientDropdownOpen] = useState(false);
   const [successMsg, setSuccessMsg] = useState(false);
+  const [mobileTab, setMobileTab] = useState<'productos' | 'carrito'>('productos');
 
   useEffect(() => {
     fetchData();
@@ -228,212 +229,250 @@ export default function VentasPage() {
 
   return (
     <div className="h-screen print:h-auto w-full relative">
-      {/* Vista de Pantalla (Se oculta al imprimir) */}
-      <main className="print:hidden flex flex-col lg:flex-row h-screen bg-gray-950 animate-in fade-in duration-500">
-      
-      {/* Panel Izquierdo: Catálogo de Productos */}
-      <div className="flex-1 flex flex-col p-4 md:p-6 overflow-hidden">
-        <div className="flex items-center gap-3 mb-6">
-          <ShoppingCart className="text-emerald-400" size={28} />
-          <h1 className="text-2xl font-bold text-white">Nueva Venta</h1>
-        </div>
+      {/* Vista de Pantalla */}
+      <main className="print:hidden flex flex-col h-screen bg-gray-950 animate-in fade-in duration-500">
 
-        {/* Buscador */}
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-3 text-gray-500" size={20} />
-          <input 
-            type="text" 
-            placeholder="Buscar producto por código o nombre..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-gray-900 border border-gray-800 rounded-xl py-3 pl-10 pr-4 text-white focus:outline-none focus:border-emerald-500 transition-colors"
-          />
-        </div>
-
-        {/* Lista de Productos */}
-        <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-          <div className="flex flex-col gap-3">
-            {filteredProducts.map(prod => (
-              <div 
-                key={prod.id} 
-                onClick={() => addToCart(prod)}
-                className="bg-gray-900 border border-gray-800 hover:border-emerald-500/50 rounded-xl p-3 cursor-pointer transition-all hover:bg-gray-800 flex items-center justify-between group"
-              >
-                <div className="flex items-center gap-4">
-                  {prod.imagen_url ? (
-                    <img src={prod.imagen_url} alt={prod.nombre} className="w-14 h-14 object-cover rounded-lg bg-gray-950 border border-gray-800" />
-                  ) : (
-                    <div className="w-14 h-14 rounded-lg bg-gray-950 border border-gray-800 flex items-center justify-center text-gray-600">
-                      <Package size={24} />
-                    </div>
-                  )}
-                  <div>
-                    <h3 className="text-white font-medium text-base mb-1">{prod.nombre}</h3>
-                    <p className="text-gray-500 text-xs font-mono">{prod.codigo}</p>
-                  </div>
-                </div>
-                
-                <div className="text-right">
-                  <div className="text-emerald-400 font-bold text-lg">{empresa.moneda}{parseFloat(prod.precio_venta).toFixed(2)}</div>
-                  <div className="flex flex-col items-end gap-1 mt-1">
-                    <div className="text-xs px-2 py-1 bg-gray-950 rounded-lg text-gray-400 border border-gray-800">
-                      Stock: {prod.stock}
-                    </div>
-                    {prod.fecha_vencimiento && (
-                      <div className={`text-[10px] px-2 py-1 rounded-lg font-bold border ${
-                        new Date(prod.fecha_vencimiento).getTime() < new Date().setHours(0,0,0,0) 
-                        ? 'bg-red-500/20 text-red-500 border-red-500/30' 
-                        : 'bg-orange-500/20 text-orange-400 border-orange-500/30'
-                      }`}>
-                        Venc: {prod.fecha_vencimiento}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-            {filteredProducts.length === 0 && (
-              <div className="col-span-full text-center py-10 text-gray-500">
-                No se encontraron productos.
-              </div>
+        {/* TAB BAR: Solo visible en móvil */}
+        <div className="flex lg:hidden border-b border-gray-800 bg-gray-900 shrink-0">
+          <button
+            onClick={() => setMobileTab('productos')}
+            className={`flex-1 py-3 text-sm font-semibold flex items-center justify-center gap-2 transition-colors ${
+              mobileTab === 'productos'
+                ? 'text-emerald-400 border-b-2 border-emerald-400'
+                : 'text-gray-500'
+            }`}
+          >
+            <Package size={16} /> Productos
+          </button>
+          <button
+            onClick={() => setMobileTab('carrito')}
+            className={`flex-1 py-3 text-sm font-semibold flex items-center justify-center gap-2 transition-colors relative ${
+              mobileTab === 'carrito'
+                ? 'text-emerald-400 border-b-2 border-emerald-400'
+                : 'text-gray-500'
+            }`}
+          >
+            <ShoppingCart size={16} />
+            Carrito
+            {cart.length > 0 && (
+              <span className="absolute top-2 right-[calc(50%-28px)] bg-emerald-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                {cart.length}
+              </span>
             )}
-          </div>
+          </button>
         </div>
-      </div>
 
-      {/* Panel Derecho: Ticket / Carrito */}
-      <div className="w-full lg:w-[400px] bg-gray-900 border-l border-gray-800 flex flex-col h-full shadow-2xl z-10">
-        
-        {/* Header Ticket */}
-        <div className="p-5 border-b border-gray-800 bg-gray-900/50">
-          <h2 className="text-lg font-bold text-white mb-3">Ticket de Compra</h2>
-          <div className="relative">
-            <User className="absolute left-3 top-2.5 text-gray-500" size={16} />
-            <input 
-              type="text"
-              placeholder="Buscar cliente (vacío = Consumidor Final)..."
-              value={clientSearchTerm}
-              onChange={(e) => {
-                setClientSearchTerm(e.target.value);
-                setIsClientDropdownOpen(true);
-                setSelectedCliente('');
-              }}
-              onFocus={() => setIsClientDropdownOpen(true)}
-              onBlur={() => setTimeout(() => setIsClientDropdownOpen(false), 200)}
-              className="w-full bg-gray-950 border border-gray-800 rounded-lg py-2 pl-9 pr-4 text-sm text-white focus:outline-none focus:border-emerald-500"
-            />
-            {isClientDropdownOpen && (
-              <div className="absolute z-50 w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-2xl max-h-48 overflow-y-auto custom-scrollbar">
-                {'Consumidor Final'.toLowerCase().includes(clientSearchTerm.toLowerCase()) && (
+        {/* CONTENIDO: flex-row en desktop, tabs en móvil */}
+        <div className="flex flex-1 overflow-hidden">
+
+          {/* Panel Izquierdo: Catálogo de Productos */}
+          <div className={`flex-1 flex flex-col p-4 md:p-6 overflow-hidden ${
+            mobileTab === 'productos' ? 'flex' : 'hidden'
+          } lg:flex`}>
+            <div className="flex items-center gap-3 mb-4">
+              <ShoppingCart className="text-emerald-400" size={24} />
+              <h1 className="text-xl font-bold text-white">Nueva Venta</h1>
+            </div>
+
+            {/* Buscador */}
+            <div className="relative mb-4">
+              <Search className="absolute left-3 top-3 text-gray-500" size={20} />
+              <input 
+                type="text" 
+                placeholder="Buscar producto por código o nombre..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-gray-900 border border-gray-800 rounded-xl py-3 pl-10 pr-4 text-white focus:outline-none focus:border-emerald-500 transition-colors"
+              />
+            </div>
+
+            {/* Lista de Productos */}
+            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+              <div className="flex flex-col gap-3">
+                {filteredProducts.map(prod => (
                   <div 
-                    className="px-4 py-2 hover:bg-gray-700 cursor-pointer text-sm text-gray-300"
-                    onClick={() => {
-                      setSelectedCliente('');
-                      setClientSearchTerm('');
-                      setIsClientDropdownOpen(false);
-                    }}
+                    key={prod.id} 
+                    onClick={() => { addToCart(prod); setMobileTab('carrito'); }}
+                    className="bg-gray-900 border border-gray-800 hover:border-emerald-500/50 rounded-xl p-3 cursor-pointer transition-all hover:bg-gray-800 flex items-center justify-between group"
                   >
-                    Consumidor Final
-                  </div>
-                )}
-                {clientes.filter(c => c.nombre.toLowerCase().includes(clientSearchTerm.toLowerCase())).map(c => (
-                  <div 
-                    key={c.id} 
-                    className="px-4 py-2 hover:bg-gray-700 cursor-pointer text-sm text-white border-t border-gray-700/50"
-                    onClick={() => {
-                      setSelectedCliente(c.id);
-                      setClientSearchTerm(c.nombre);
-                      setIsClientDropdownOpen(false);
-                    }}
-                  >
-                    {c.nombre}
+                    <div className="flex items-center gap-3">
+                      {prod.imagen_url ? (
+                        <img src={prod.imagen_url} alt={prod.nombre} className="w-12 h-12 object-cover rounded-lg bg-gray-950 border border-gray-800" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-lg bg-gray-950 border border-gray-800 flex items-center justify-center text-gray-600">
+                          <Package size={20} />
+                        </div>
+                      )}
+                      <div>
+                        <h3 className="text-white font-medium text-sm mb-0.5">{prod.nombre}</h3>
+                        <p className="text-gray-500 text-xs font-mono">{prod.codigo}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="text-right shrink-0">
+                      <div className="text-emerald-400 font-bold">{empresa.moneda}{parseFloat(prod.precio_venta).toFixed(2)}</div>
+                      <div className="flex flex-col items-end gap-1 mt-1">
+                        <div className="text-xs px-2 py-0.5 bg-gray-950 rounded-lg text-gray-400 border border-gray-800">
+                          Stock: {prod.stock}
+                        </div>
+                        {prod.fecha_vencimiento && (
+                          <div className={`text-[10px] px-2 py-0.5 rounded-lg font-bold border ${
+                            new Date(prod.fecha_vencimiento).getTime() < new Date().setHours(0,0,0,0) 
+                            ? 'bg-red-500/20 text-red-500 border-red-500/30' 
+                            : 'bg-orange-500/20 text-orange-400 border-orange-500/30'
+                          }`}>
+                            Venc: {prod.fecha_vencimiento}
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 ))}
+                {filteredProducts.length === 0 && (
+                  <div className="col-span-full text-center py-10 text-gray-500">
+                    No se encontraron productos.
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Lista de Items */}
-        <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
-          {cart.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-gray-500 opacity-50">
-              <ShoppingCart size={48} className="mb-4" />
-              <p>El carrito está vacío</p>
             </div>
-          ) : (
-            <div className="space-y-2">
-              {cart.map(item => (
-                <div key={item.id} className="bg-gray-950 p-3 rounded-xl border border-gray-800 flex flex-col gap-2">
-                  <div className="flex justify-between items-start">
-                    <div className="flex flex-col">
-                      <span className="text-white font-medium text-sm leading-tight pr-4">{item.nombre}</span>
-                      {item.fecha_vencimiento && new Date(item.fecha_vencimiento).getTime() < new Date().setHours(0,0,0,0) && (
-                        <span className="text-[10px] text-red-500 font-bold mt-0.5">⚠️ VENCIDO</span>
-                      )}
-                    </div>
-                    <button onClick={() => removeFromCart(item.id)} className="text-gray-500 hover:text-red-400">
-                      <Trash2 size={16} />
-                    </button>
+          </div>
+
+          {/* Panel Derecho: Ticket / Carrito */}
+          <div className={`w-full lg:w-[400px] bg-gray-900 border-l border-gray-800 flex flex-col shadow-2xl z-10 ${
+            mobileTab === 'carrito' ? 'flex' : 'hidden'
+          } lg:flex`}>
+            
+            {/* Header Ticket */}
+            <div className="p-4 border-b border-gray-800 bg-gray-900/50">
+              <h2 className="text-base font-bold text-white mb-3">Ticket de Compra</h2>
+              <div className="relative">
+                <User className="absolute left-3 top-2.5 text-gray-500" size={16} />
+                <input 
+                  type="text"
+                  placeholder="Buscar cliente (vacío = Consumidor Final)..."
+                  value={clientSearchTerm}
+                  onChange={(e) => {
+                    setClientSearchTerm(e.target.value);
+                    setIsClientDropdownOpen(true);
+                    setSelectedCliente('');
+                  }}
+                  onFocus={() => setIsClientDropdownOpen(true)}
+                  onBlur={() => setTimeout(() => setIsClientDropdownOpen(false), 200)}
+                  className="w-full bg-gray-950 border border-gray-800 rounded-lg py-2 pl-9 pr-4 text-sm text-white focus:outline-none focus:border-emerald-500"
+                />
+                {isClientDropdownOpen && (
+                  <div className="absolute z-50 w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-2xl max-h-48 overflow-y-auto custom-scrollbar">
+                    {'Consumidor Final'.toLowerCase().includes(clientSearchTerm.toLowerCase()) && (
+                      <div 
+                        className="px-4 py-2 hover:bg-gray-700 cursor-pointer text-sm text-gray-300"
+                        onClick={() => {
+                          setSelectedCliente('');
+                          setClientSearchTerm('');
+                          setIsClientDropdownOpen(false);
+                        }}
+                      >
+                        Consumidor Final
+                      </div>
+                    )}
+                    {clientes.filter(c => c.nombre.toLowerCase().includes(clientSearchTerm.toLowerCase())).map(c => (
+                      <div 
+                        key={c.id} 
+                        className="px-4 py-2 hover:bg-gray-700 cursor-pointer text-sm text-white border-t border-gray-700/50"
+                        onClick={() => {
+                          setSelectedCliente(c.id);
+                          setClientSearchTerm(c.nombre);
+                          setIsClientDropdownOpen(false);
+                        }}
+                      >
+                        {c.nombre}
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex justify-between items-center mt-1">
-                    <span className="text-emerald-400 font-bold text-sm">{empresa.moneda}{item.precio_venta}</span>
-                    
-                    <div className="flex items-center gap-3 bg-gray-900 rounded-lg p-1 border border-gray-800">
-                      <button onClick={() => updateQuantity(item.id, -1)} className="p-1 text-gray-400 hover:text-white bg-gray-800 rounded-md">
-                        <Minus size={14} />
-                      </button>
-                      <span className="text-white text-sm font-medium w-4 text-center">{item.cantidad}</span>
-                      <button onClick={() => updateQuantity(item.id, 1)} className="p-1 text-gray-400 hover:text-white bg-gray-800 rounded-md">
-                        <Plus size={14} />
-                      </button>
-                    </div>
-                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Lista de Items */}
+            <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
+              {cart.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-gray-500 opacity-50">
+                  <ShoppingCart size={48} className="mb-4" />
+                  <p>El carrito está vacío</p>
                 </div>
-              ))}
+              ) : (
+                <div className="space-y-2">
+                  {cart.map(item => (
+                    <div key={item.id} className="bg-gray-950 p-3 rounded-xl border border-gray-800 flex flex-col gap-2">
+                      <div className="flex justify-between items-start">
+                        <div className="flex flex-col">
+                          <span className="text-white font-medium text-sm leading-tight pr-4">{item.nombre}</span>
+                          {item.fecha_vencimiento && new Date(item.fecha_vencimiento).getTime() < new Date().setHours(0,0,0,0) && (
+                            <span className="text-[10px] text-red-500 font-bold mt-0.5">⚠️ VENCIDO</span>
+                          )}
+                        </div>
+                        <button onClick={() => removeFromCart(item.id)} className="text-gray-500 hover:text-red-400">
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                      <div className="flex justify-between items-center mt-1">
+                        <span className="text-emerald-400 font-bold text-sm">{empresa.moneda}{item.precio_venta}</span>
+                        
+                        <div className="flex items-center gap-3 bg-gray-900 rounded-lg p-1 border border-gray-800">
+                          <button onClick={() => updateQuantity(item.id, -1)} className="p-1 text-gray-400 hover:text-white bg-gray-800 rounded-md">
+                            <Minus size={14} />
+                          </button>
+                          <span className="text-white text-sm font-medium w-4 text-center">{item.cantidad}</span>
+                          <button onClick={() => updateQuantity(item.id, 1)} className="p-1 text-gray-400 hover:text-white bg-gray-800 rounded-md">
+                            <Plus size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        {/* Resumen y Cobro */}
-        <div className="p-5 border-t border-gray-800 bg-gray-900">
-          <div className="flex justify-between text-gray-400 mb-2 text-sm">
-            <span>Subtotal</span>
-            <span>{empresa.moneda}{total.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between text-gray-400 mb-4 text-sm">
-            <span>Impuestos (0%)</span>
-            <span>{empresa.moneda}0.00</span>
-          </div>
-          <div className="flex justify-between text-white font-bold text-2xl mb-6">
-            <span>Total</span>
-            <span className="text-emerald-400">{empresa.moneda}{total.toFixed(2)}</span>
-          </div>
+            {/* Resumen y Cobro */}
+            <div className="p-4 border-t border-gray-800 bg-gray-900">
+              <div className="flex justify-between text-gray-400 mb-1 text-sm">
+                <span>Subtotal</span>
+                <span>{empresa.moneda}{total.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-gray-400 mb-3 text-sm">
+                <span>Impuestos (0%)</span>
+                <span>{empresa.moneda}0.00</span>
+              </div>
+              <div className="flex justify-between text-white font-bold text-xl mb-4">
+                <span>Total</span>
+                <span className="text-emerald-400">{empresa.moneda}{total.toFixed(2)}</span>
+              </div>
 
-          {successMsg ? (
-            <div className="w-full bg-emerald-500/20 text-emerald-400 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 border border-emerald-500/30">
-              <CheckCircle2 size={24} /> ¡Venta Exitosa!
+              {successMsg ? (
+                <div className="w-full bg-emerald-500/20 text-emerald-400 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 border border-emerald-500/30">
+                  <CheckCircle2 size={24} /> ¡Venta Exitosa!
+                </div>
+              ) : (
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => processSale(false)}
+                    disabled={cart.length === 0 || processing}
+                    className="flex-1 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-white py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2"
+                  >
+                    {processing ? <Loader2 className="animate-spin" size={20} /> : 'Solo Cobrar'}
+                  </button>
+                  <button 
+                    onClick={() => processSale(true)}
+                    disabled={cart.length === 0 || processing}
+                    className="flex-[2] bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:bg-gray-800 text-white py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2"
+                  >
+                    {processing ? <Loader2 className="animate-spin" size={20} /> : 'Cobrar e Imprimir'}
+                  </button>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="flex gap-3">
-              <button 
-                onClick={() => processSale(false)}
-                disabled={cart.length === 0 || processing}
-                className="flex-1 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-white py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2"
-              >
-                {processing ? <Loader2 className="animate-spin" size={20} /> : 'Solo Cobrar'}
-              </button>
-              <button 
-                onClick={() => processSale(true)}
-                disabled={cart.length === 0 || processing}
-                className="flex-[2] bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:bg-gray-800 text-white py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2"
-              >
-                {processing ? <Loader2 className="animate-spin" size={20} /> : 'Cobrar e Imprimir'}
-              </button>
-            </div>
-          )}
+          </div>
         </div>
-      </div>
       </main>
 
       {/* Ticket para Imprimir (Oculto en pantalla, visible solo al imprimir) */}
