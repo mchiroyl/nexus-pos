@@ -365,7 +365,8 @@ export default function VentasPage() {
                     {'Consumidor Final'.toLowerCase().includes(clientSearchTerm.toLowerCase()) && (
                       <div 
                         className="px-4 py-2 hover:bg-gray-700 cursor-pointer text-sm text-gray-300"
-                        onClick={() => {
+                        onMouseDown={(e) => {
+                          e.preventDefault();
                           setSelectedCliente('');
                           setClientSearchTerm('');
                           setIsClientDropdownOpen(false);
@@ -381,7 +382,8 @@ export default function VentasPage() {
                       <div 
                         key={c.id} 
                         className="px-4 py-2 hover:bg-gray-700 cursor-pointer text-sm text-white border-t border-gray-700/50"
-                        onClick={() => {
+                        onMouseDown={(e) => {
+                          e.preventDefault();
                           setSelectedCliente(c.id);
                           setClientSearchTerm(c.nombre);
                           setIsClientDropdownOpen(false);
