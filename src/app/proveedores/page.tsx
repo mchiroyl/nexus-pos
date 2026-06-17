@@ -130,7 +130,7 @@ export default function ProveedoresPage() {
             <thead className="bg-gray-950/50 text-gray-400">
               <tr>
                 <th className="p-4 font-medium">NIT / DPI</th>
-                <th className="p-4 font-medium">Razón Social</th>
+                <th className="p-4 font-medium">Nombre del Proveedor</th>
                 <th className="p-4 font-medium hidden md:table-cell">Teléfono</th>
                 <th className="p-4 font-medium hidden lg:table-cell">Email</th>
                 <th className="p-4 font-medium">Estado</th>
@@ -203,7 +203,7 @@ export default function ProveedoresPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-1">Razón Social</label>
+                    <label className="block text-sm font-medium text-gray-400 mb-1">Nombre del Proveedor</label>
                     <input 
                       required
                       type="text" 
