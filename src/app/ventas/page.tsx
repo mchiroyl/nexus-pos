@@ -36,6 +36,7 @@ export default function VentasPage() {
   // Cart State
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedCliente, setSelectedCliente] = useState('');
+  const [clienteConfirmado, setClienteConfirmado] = useState(false);
   const [clientSearchTerm, setClientSearchTerm] = useState('');
   const [isClientDropdownOpen, setIsClientDropdownOpen] = useState(false);
   const [successMsg, setSuccessMsg] = useState(false);
@@ -132,7 +133,7 @@ export default function VentasPage() {
   const total = cart.reduce((sum, item) => sum + item.subtotal, 0);
 
   const processSale = async (shouldPrint: boolean) => {
-    if (cart.length === 0) return;
+    if (cart.length === 0 || !clienteConfirmado) return;
     setProcessing(true);
     try {
       const ventaId = `VEN-${Date.now().toString().slice(-6)}`;
@@ -192,6 +193,7 @@ export default function VentasPage() {
         setCart([]);
         setSelectedCliente('');
         setClientSearchTerm('');
+        setClienteConfirmado(false);
       }, 100);
 
       fetchData(); // Recargar productos para refrescar el stock
@@ -349,7 +351,7 @@ export default function VentasPage() {
                 <User className="absolute left-3 top-2.5 text-gray-500" size={16} />
                 <input 
                   type="text"
-                  placeholder="Buscar cliente (vacío = Consumidor Final)..."
+                  placeholder="* Seleccione cliente (obligatorio)"
                   value={clientSearchTerm}
                   onChange={(e) => {
                     setClientSearchTerm(e.target.value);
@@ -368,7 +370,8 @@ export default function VentasPage() {
                         onMouseDown={(e) => {
                           e.preventDefault();
                           setSelectedCliente('');
-                          setClientSearchTerm('');
+                          setClientSearchTerm('Consumidor Final');
+                          setClienteConfirmado(true);
                           setIsClientDropdownOpen(false);
                         }}
                       >
@@ -386,6 +389,7 @@ export default function VentasPage() {
                           e.preventDefault();
                           setSelectedCliente(c.id);
                           setClientSearchTerm(c.nombre);
+                          setClienteConfirmado(true);
                           setIsClientDropdownOpen(false);
                         }}
                       >
@@ -453,6 +457,12 @@ export default function VentasPage() {
                 <span className="text-emerald-400">{empresa.moneda}{total.toFixed(2)}</span>
               </div>
 
+              {!clienteConfirmado && cart.length > 0 && (
+                <div className="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2 mb-3 text-center">
+                  ⚠️ Seleccione un cliente antes de cobrar
+                </div>
+              )}
+
               {successMsg ? (
                 <div className="w-full bg-emerald-500/20 text-emerald-400 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 border border-emerald-500/30">
                   <CheckCircle2 size={24} /> ¡Venta Exitosa!
@@ -461,14 +471,14 @@ export default function VentasPage() {
                 <div className="flex gap-3">
                   <button 
                     onClick={() => processSale(false)}
-                    disabled={cart.length === 0 || processing}
+                    disabled={cart.length === 0 || processing || !clienteConfirmado}
                     className="flex-1 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-white py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2"
                   >
                     {processing ? <Loader2 className="animate-spin" size={20} /> : 'Solo Cobrar'}
                   </button>
                   <button 
                     onClick={() => processSale(true)}
-                    disabled={cart.length === 0 || processing}
+                    disabled={cart.length === 0 || processing || !clienteConfirmado}
                     className="flex-[2] bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:bg-gray-800 text-white py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2"
                   >
                     {processing ? <Loader2 className="animate-spin" size={20} /> : 'Cobrar e Imprimir'}
