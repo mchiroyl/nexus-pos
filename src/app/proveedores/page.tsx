@@ -129,7 +129,7 @@ export default function ProveedoresPage() {
           <table className="w-full text-left text-sm whitespace-nowrap">
             <thead className="bg-gray-950/50 text-gray-400">
               <tr>
-                <th className="p-4 font-medium">NIT/RUC</th>
+                <th className="p-4 font-medium">NIT / DPI</th>
                 <th className="p-4 font-medium">Razón Social</th>
                 <th className="p-4 font-medium hidden md:table-cell">Teléfono</th>
                 <th className="p-4 font-medium hidden lg:table-cell">Email</th>
@@ -182,7 +182,7 @@ export default function ProveedoresPage() {
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-start sm:items-center justify-center p-4 overflow-y-auto pt-4">
           <div className="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="p-6">
               <h2 className="text-xl font-bold text-white mb-4">
@@ -191,11 +191,13 @@ export default function ProveedoresPage() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-1">NIT / RUC</label>
+                    <label className="block text-sm font-medium text-gray-400 mb-1">
+                      NIT / DPI <span className="text-xs text-gray-500 font-normal">(Opcional)</span>
+                    </label>
                     <input 
-                      required
                       type="text" 
                       value={formData.documento}
+                      placeholder="Ej: 1234567-8 ó 2345678901234"
                       onChange={e => setFormData({...formData, documento: e.target.value})}
                       className="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-emerald-500 transition-colors"
                     />
