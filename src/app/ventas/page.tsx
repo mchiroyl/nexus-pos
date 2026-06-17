@@ -357,6 +357,7 @@ export default function VentasPage() {
                     setClientSearchTerm(e.target.value);
                     setIsClientDropdownOpen(true);
                     setSelectedCliente('');
+                    setClienteConfirmado(false);
                   }}
                   onFocus={() => setIsClientDropdownOpen(true)}
                   onBlur={() => setTimeout(() => setIsClientDropdownOpen(false), 200)}
