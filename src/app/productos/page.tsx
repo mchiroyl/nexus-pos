@@ -498,7 +498,8 @@ export default function ProductosPage() {
                       <input 
                         type="date" value={formData.fecha_vencimiento}
                         onChange={e => setFormData({...formData, fecha_vencimiento: e.target.value})}
-                        className="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-white focus:border-emerald-500 transition-colors"
+                        onKeyDown={e => e.preventDefault()}
+                        className="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-white focus:border-emerald-500 transition-colors cursor-pointer"
                       />
                     </div>
                   </div>
