@@ -374,7 +374,10 @@ export default function VentasPage() {
                         Consumidor Final
                       </div>
                     )}
-                    {clientes.filter(c => c.nombre.toLowerCase().includes(clientSearchTerm.toLowerCase())).map(c => (
+                    {clientes.filter(c => 
+                      c.nombre.toLowerCase().includes(clientSearchTerm.toLowerCase()) &&
+                      c.nombre.toLowerCase() !== 'consumidor final'
+                    ).map(c => (
                       <div 
                         key={c.id} 
                         className="px-4 py-2 hover:bg-gray-700 cursor-pointer text-sm text-white border-t border-gray-700/50"
